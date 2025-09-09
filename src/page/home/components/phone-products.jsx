@@ -116,8 +116,8 @@ export function PhoneProducts({ name, path = "phones" }) {
                 direction={"row"}
                 width={"100%"}
               >
-                <Link to={`product/${item.id}`} style={{ textDecoration: "none", color: "black" }}>
-                  <Product item={item} />
+                <Link to={`/${item.category || path}/${item.id}`} style={{ textDecoration: "none", color: "black" }}>
+                  <Product item={item} category={item.category || path} />
                 </Link>
               </Stack>
             ))

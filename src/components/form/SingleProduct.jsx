@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { useGetPhones } from "../../page/home/query/useGetPhones";
-import useGetLaptops from "../../page/home/query/useGetLaptops";
+import { getCategory } from "../../page/home/query/useGetCategory";
 import {
   Container,
   Grid,
@@ -13,24 +12,20 @@ import {
 import { saveState, loadState } from "../../config/data/localStorage";
 
 export default function SingleProduct() {
-  const { id } = useParams();
-  const [item, setProduct] = useState(null);
-
-  const { data: phones, isLoading: loadingPhones } = useGetPhones("phones");
-  const { data: laptops, isLoading: loadingLaptops } = useGetLaptops("computers");
+  const { category, id } = useParams();
+  const { data, isLoading, isError } = getCategory(category);
+  const [item, setItem] = useState(null);
 
   useEffect(() => {
-    if (!phones && !laptops) return;
+    if (data && id) {
+      const found = data.find((product) => String(product.id) === String(id));
+      setItem(found);
+    }
+  }, [data, id]);
 
-    // Barcha mahsulotlarni bitta massivga yig'amiz
-    const allProducts = [...(phones || []), ...(laptops || [])];
-
-    const found = allProducts.find((product) => String(product.id) === String(id));
-    setProduct(found);
-  }, [id, phones, laptops]);
-
-  if (loadingPhones || loadingLaptops) return <h2>Loading...</h2>;
-  if (!item) return <h2>Product not found</h2>;
+  if (isLoading) return <h2>Loading...</h2>;
+  if (isError) return <h2>Xatolik yuz berdi</h2>;
+  if (!item) return <h2>Mahsulot topilmadi</h2>;
 
   // 🛒 Cart ga qo‘shish
   const handleAddToCart = () => {
@@ -43,7 +38,7 @@ export default function SingleProduct() {
         p.id === item.id ? { ...p, quantity: (p.quantity || 1) + 1 } : p
       );
     } else {
-      updatedCart = [...cart, { ...item, quantity: 1 }];
+      updatedCart = [...cart, { ...item, quantity: 1 }]; // quantity: 1
     }
 
     saveState("cart", updatedCart);

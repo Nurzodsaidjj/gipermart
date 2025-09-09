@@ -44,8 +44,21 @@ export default function Cart() {
   };
 
   const total = cart.reduce(
-    (acc, item) =>
-      acc + parseInt(item.price.replace(/\s/g, "")) * item.quantity,
+    (acc, item) => {
+      let price = 0;
+      if (typeof item.price === "string" && item.price) {
+        const cleaned = item.price.replace(/\s/g, "");
+        price = isNaN(Number(cleaned)) ? 0 : Number(cleaned);
+      } else if (typeof item.price === "number" && !isNaN(item.price)) {
+        price = item.price;
+      }
+      // quantity har doim 1 bo‘lishini kafolatlash
+      const qty =
+        typeof item.quantity === "number" && item.quantity > 0
+          ? item.quantity
+          : 1;
+      return acc + price * qty;
+    },
     0
   );
 

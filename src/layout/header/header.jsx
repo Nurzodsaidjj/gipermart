@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Badge,
   Button,
@@ -17,18 +18,52 @@ import Form from "../../components/form/form";
 import User_icons from "../../assets/icon/user_icons";
 import Like_icons from "../../assets/icon/like_icons";
 import Card_icons from "../../assets/icon/card_icons";
-import React from "react";
 import menu_icons_dr from "../../assets/svg/menu.svg";
+import Catalog from "../../page/home/components/home-cotelog";
+import axios from "axios";
+
 export default function Header() {
   const [open, setopen] = React.useState(false);
   const sizedrower = useMediaQuery("(max-width:1229px)");
   const sizedrowers = useMediaQuery("(max-width:1021px)");
   const inputs = useMediaQuery("(min-width:695px)");
   const form = useMediaQuery("(min-width:540px)");
+  const [openCatalog, setOpenCatalog] = React.useState(false);
   const nav = useNavigate();
+
+  // --- SEARCH LOGIC START ---
+  const [search, setSearch] = useState("");
+  const [allProducts, setAllProducts] = useState([]);
+  const [results, setResults] = useState([]);
+
+  useEffect(() => {
+    axios.get("https://market-backend-zeta.vercel.app/all").then((res) => {
+      setAllProducts(res.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (search.trim().length === 0) {
+      setResults([]);
+      return;
+    }
+    const filtered = allProducts.filter((item) =>
+      item.title?.toLowerCase().includes(search.toLowerCase())
+    );
+    setResults(filtered);
+  }, [search, allProducts]);
+
+  const handleSelect = (item) => {
+    nav(`/${item.category}/${item.id}`);
+    setSearch("");
+    setResults([]);
+  };
+  // --- SEARCH LOGIC END ---
+
   const toggleDrawer = (data) => {
     setopen(data);
   };
+
   return (
     <header>
       {inputs ? (
@@ -82,7 +117,7 @@ export default function Header() {
         </div>
       ) : null}
 
-      <div className="header">
+      <div className="header" style={{ position: "relative" }}>
         <Container>
           <Stack
             direction={"row"}
@@ -96,14 +131,66 @@ export default function Header() {
               alt="header_img"
             />
             {inputs ? (
-              <Button sx={{ maxWidth: "150px" }} variant="contained">
+              <Button
+                sx={{ maxWidth: "150px" }}
+                variant="contained"
+                onClick={() => setOpenCatalog(true)}
+              >
                 <Stack direction={"row"} gap={"12px"} alignItems={"center"}>
                   <Menu_icons />
                   Каталог
                 </Stack>
               </Button>
             ) : null}
-            {form ? <Form page={"header"} /> : null}
+
+            {/* --- SEARCH INPUT START --- */}
+            {form ? (
+              <div style={{ position: "relative", width: 250 }}>
+                <input
+                  type="text"
+                  placeholder="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  style={{
+                    padding: "8px",
+                    width: "100%",
+                    borderRadius: "6px",
+                    border: "1px solid #eee",
+                  }}
+                />
+                {results.length > 0 && (
+                  <ul
+                    style={{
+                      position: "absolute",
+                      background: "#fff",
+                      border: "1px solid #eee",
+                      width: "100%",
+                      zIndex: 1000,
+                      listStyle: "none",
+                      margin: 0,
+                      padding: "8px",
+                      maxHeight: "320px",
+                      overflowY: "auto",
+                    }}
+                  >
+                    {results.slice(0, 8).map((item) => (
+                      <li
+                        key={item.id}
+                        style={{
+                          cursor: "pointer",
+                          padding: "4px 0",
+                          borderBottom: "1px solid #f3f3f3",
+                        }}
+                        onClick={() => handleSelect(item)}
+                      >
+                        {item.title}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </div>
+            ) : null}
+            {/* --- SEARCH INPUT END --- */}
 
             {!sizedrowers ? (
               <>
@@ -238,15 +325,11 @@ export default function Header() {
                         </>
                       ) : null}
                     </Stack>
-                    {!inputs ? (
+                    {inputs ? (
                       <Button
                         sx={{ maxWidth: "150px" }}
-                        style={{
-                          marginLeft: "auto",
-                          marginRight: "auto",
-                          marginTop: "20px",
-                        }}
                         variant="contained"
+                        onClick={() => setOpenCatalog(true)}
                       >
                         <Stack
                           direction={"row"}
@@ -260,10 +343,15 @@ export default function Header() {
                     ) : null}
                   </Stack>
                 </Drawer>
+                {form ? <Form page={"header"} /> : null}
               </>
             ) : (
               ""
             )}
+            <Catalog
+              open={openCatalog}
+              handleClose={() => setOpenCatalog(false)}
+            />
           </Stack>
         </Container>
       </div>

@@ -3,7 +3,9 @@ import React from "react";
 import Like_icons from "../assets/icon/like_icons";
 import Card_icons from "../assets/icon/card_icons";
 import { addToCart } from "../page/home/query/addToCart";
-export default function Product({ item }) {
+import { useNavigate } from "react-router-dom";
+export default function Product({ item, category }) {
+  const navigate = useNavigate();
   return (
     <Stack
       width={234}
@@ -13,7 +15,7 @@ export default function Product({ item }) {
         paddingLeft: "4px",
         paddingRight: "48px",
         borderRadius: "12px",
-        flexShrink: 0, // slider ichida siqilib ketmasin
+        flexShrink: 0,
       }}
     >
       <Stack flexGrow={1}>
@@ -50,7 +52,10 @@ export default function Product({ item }) {
           {item.price} CYM
         </Typography>
         <Button
-          onClick={() => addToCart(item)}
+          onClick={() => {
+            addToCart(item);
+            navigate(`/${category}/${item.id}`); // category propdan foydalanildi
+          }}
           sx={{
             backgroundColor: "yellow",
             minWidth: "40px",

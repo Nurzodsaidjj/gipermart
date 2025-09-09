@@ -1,9 +1,4 @@
-import {
-  Container,
-  IconButton,
-  Stack,
-  Typography,
-} from "@mui/material";
+import { Container, IconButton, Stack, Typography } from "@mui/material";
 import Slider from "react-slick";
 import Like_icons from "../../../assets/icon/like_icons";
 import Card_icons from "../../../assets/icon/card_icons";
@@ -118,8 +113,11 @@ export function LaptopProducts({ name, path = "computers" }) {
                 direction={"row"}
                 width={"100%"}
               >
-                <Link to={`product/${item.id}`} style={{ textDecoration: "none", color: "black" }}>
-                  <Product item={item} />
+                <Link
+                  to={`/${item.category || path}/${item.id}`}
+                  style={{ textDecoration: "none", color: "black" }}
+                >
+                  <Product item={item} category={item.category || path} />
                 </Link>
               </Stack>
             ))
