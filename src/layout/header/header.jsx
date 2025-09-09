@@ -31,7 +31,6 @@ export default function Header() {
   const [openCatalog, setOpenCatalog] = React.useState(false);
   const nav = useNavigate();
 
-  // --- SEARCH LOGIC START ---
   const [search, setSearch] = useState("");
   const [allProducts, setAllProducts] = useState([]);
   const [results, setResults] = useState([]);
@@ -58,7 +57,25 @@ export default function Header() {
     setSearch("");
     setResults([]);
   };
-  // --- SEARCH LOGIC END ---
+
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    function updateCartCount() {
+      const cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const total = cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
+      setCartCount(total);
+    }
+    updateCartCount();
+    window.addEventListener("storage", updateCartCount);
+
+    const interval = setInterval(updateCartCount, 1000);
+
+    return () => {
+      window.removeEventListener("storage", updateCartCount);
+      clearInterval(interval);
+    };
+  }, []);
 
   const toggleDrawer = (data) => {
     setopen(data);
@@ -143,7 +160,6 @@ export default function Header() {
               </Button>
             ) : null}
 
-            {/* --- SEARCH INPUT START --- */}
             {form ? (
               <div style={{ position: "relative", width: 250 }}>
                 <input
@@ -190,7 +206,6 @@ export default function Header() {
                 )}
               </div>
             ) : null}
-            {/* --- SEARCH INPUT END --- */}
 
             {!sizedrowers ? (
               <>
@@ -217,7 +232,7 @@ export default function Header() {
                         color: "white",
                       },
                     }}
-                    badgeContent={0}
+                    badgeContent={cartCount}
                     showZero
                   >
                     <Card_icons />
@@ -302,7 +317,7 @@ export default function Header() {
                                   color: "white",
                                 },
                               }}
-                              badgeContent={0}
+                              badgeContent={cartCount}
                               showZero
                             >
                               <Card_icons />
